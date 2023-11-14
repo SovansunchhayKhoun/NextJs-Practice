@@ -1,36 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { v4 } from "uuid";
-import fsPromises from "fs/promises";
-import { format } from "date-fns";
-
-// file path to dummy data
-const filePath = __dirname.split(".next")[0] + "/public/data.json";
+import dbConnect from "@/libs/dbConnect";
+import Todo from "@/model/Todo";
 
 export async function GET() {
-  // read data from json file
-  const data = await fsPromises.readFile(filePath, "utf-8");
-  // parse json to string
-  const jsonData = JSON.parse(data);
-
-  return NextResponse.json({ data: jsonData });
+  await dbConnect();
+  const todos = await Todo.find({});
+  return NextResponse.json({ message: "Success", data: todos });
 }
 
 export async function POST(req: NextRequest) {
-  const { todo } = await req.json();
-  if (!todo || todo.trim() === "")
-    return NextResponse.json({ message: "Todo is required" });
-  // read old todo
-  const oldData = JSON.parse(await fsPromises.readFile(filePath, "utf-8"));
-  // create new todo
-  const newTodo = {
-    id: v4(),
-    todo: todo.trim(),
-    isCompleted: false,
-    createdAt: format(new Date(), "dd/MM/yyyy HH:MM:ss"),
-  };
-  // push newtodo to old todo list
-  oldData.push(newTodo);
-  // write new todo
-  await fsPromises.writeFile(filePath, JSON.stringify(oldData));
-  return NextResponse.json({ newTodo }, { status: 201 });
+  let errors = [];
+  try {
+    await dbConnect();
+    const { todo } = await req.json();
+
+    // check if todo is valid
+    if (!todo || todo.trim() === "") {
+      errors.push({ message: "Todo is required!" });
+    }
+
+    // check if duplicate todo
+    const duplicate = await Todo.findOne({ todo });
+    if (duplicate) {
+      errors.push({ message: "Todo already exists!" });
+    }
+
+    if (errors.length > 0)
+      return NextResponse.json({ errors }, { status: 400 });
+
+    // create new todo
+    const newTodo = {
+      todo: todo.trim(),
+      isCompleted: false,
+    };
+
+    const res = await Todo.create(newTodo);
+
+    return NextResponse.json({ message: "Success", data: res }, { status: 201 });
+  } catch (err: any) {
+    return NextResponse.json(
+      { message: "Unexpected error", errors: [err.errors.todo] },
+      { status: 400 }
+    );
+  }
 }

@@ -1,3 +1,4 @@
+import TodoContext from '@/libs/TodoContext'
 import './globals.css'
 
 export default function RootLayout({
@@ -8,7 +9,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className='flex min-h-screen justify-center items-center overflow-auto'>
-        {children}
+        <TodoContext>
+          {children}
+        </TodoContext>
       </body>
     </html>
   )

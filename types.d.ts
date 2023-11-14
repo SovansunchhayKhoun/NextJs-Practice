@@ -1,6 +1,10 @@
 type Todo = {
-  id?: string;
+  _id?: string;
   todo: string;
-  isCompleted?: Boolean;
+  isCompleted?: boolean;
   createdAt?: Date;
 };
+
+type TodoError = {
+  message: string
+}

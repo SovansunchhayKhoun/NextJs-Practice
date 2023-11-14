@@ -1,7 +1,8 @@
 'use client'
-import useInputTodo from '@/libs/inputTodo'
-import useTodo from '@/libs/useTodo'
 import React, { useState } from 'react'
+import EditButton from './ui/editButton'
+import DeleteButton from './ui/deleteButton'
+import { useTodoContext } from '@/libs/TodoContext'
 
 type Props = {
   todo: Todo,
@@ -9,41 +10,22 @@ type Props = {
 
 export default function TodoCard({ todo }: Props) {
   const [hover, setHover] = useState<boolean>(false)
-  const { data: todos, mutate } = useTodo()
-  const { setTodoInput } = useInputTodo()
-
-  const handleEdit = async (id: string | undefined) => {
-    console.log(todo.todo)
-    setTodoInput({ todo: todo.todo })
-    console.log(id)
-  }
-
-  const handleDelete = async (id: string | undefined) => {
-    await fetch(`http://localhost:3000/api/todos/${id}`, {
-      method: "DELETE"
-    }).then(res => console.log(res))
-    mutate([...todos])
-  }
+  const { handleEdit, handleComplete } = useTodoContext()
   return (
-    <div onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)} className='flex gap-4 border border-black items-center justify-between p-2 cursor-pointer' key={todo.id}>
+    <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className='flex gap-4 border border-black items-center justify-between p-2 cursor-pointer'>
       <div>
-        {todo.todo}
+        {todo.isCompleted ? <span className='line-through'>{todo.todo}</span> : <span>{todo.todo}</span>}
       </div>
-      {hover && (
-        <div className='flex gap-2'>
-          <button onClick={() => {
-            handleEdit(todo.id)
-          }} className='px-2 py-1 border border-black'>
-            Edit
-          </button>
-          <button onClick={() => {
-            handleDelete(todo?.id)
-          }} className='px-2 py-1 border border-black'>
-            Delete
-          </button>
-        </div>
-      )}
+      <div className={`${hover ? 'opacity-1' : 'opacity-0'} flex gap-2 transition duration-200`}>
+        <EditButton todo={todo} />
+        <DeleteButton todo={todo} />
+        <button onClick={() => handleComplete(todo)} className={`${todo.isCompleted ? 'bg-green-400' : 'bg-red-400'}`}>
+          {todo.isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
+        </button>
+      </div>
     </div>
   )
 }
