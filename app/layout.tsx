@@ -7,7 +7,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className='flex min-w-full min-h-screen justify-center items-center'>
+      <body className='flex min-h-screen justify-center items-center overflow-auto'>
         {children}
       </body>
     </html>

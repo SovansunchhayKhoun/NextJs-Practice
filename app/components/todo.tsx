@@ -2,13 +2,14 @@
 import useTodo from '@/libs/useTodo'
 import React, { useEffect, useState } from 'react'
 import TodoCard from './todoCard'
+import useInputTodo from '@/libs/inputTodo'
 
 type Props = {
-
 }
 
 export default function TodoList({ }: Props) {
-  const { data: todos, isLoading, mutate } = useTodo()
+  const { todoInput, setTodoInput } = useInputTodo()
+  const { data: todos, isLoading } = useTodo()
   const [myTodos, setMyTodos] = useState([])
   useEffect(() => {
     setMyTodos(todos)
@@ -25,9 +26,9 @@ export default function TodoList({ }: Props) {
     )
   }
   return (
-    <div className='flex flex-col'>
+    <div className='flex flex-col gap-2'>
       <input onChange={handleChange} placeholder='Search...' className='border border-black p-2' type="text" />
-      <div className='grid grid-cols-2'>
+      <div className='flex flex-col h-64 overflow-auto gap-2'>
         {myTodos?.map((todo: Todo) => {
           return (
             <TodoCard key={todo.id} todo={todo} />
