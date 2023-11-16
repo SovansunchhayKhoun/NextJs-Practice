@@ -9,7 +9,7 @@ type Props = {
 }
 
 export default function AddTodo({ }: Props) {
-  const { todoInput, submitTodo, errors, setTodoInput, handleEdit, activeTodo, setActiveTodo, setErrors } = useTodoContext()
+  const { todoInput, submitTodo, errors, setTodoInput, handleEdit, activeTodo, setActiveTodo, setErrors, loading } = useTodoContext()
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
     setTodoInput(value)
@@ -35,11 +35,12 @@ export default function AddTodo({ }: Props) {
       {activeTodo._id ? (
         <div className='flex justify-center gap-2 w-full'>
           <button
+            aria-disabled={loading}
             onClick={() => {
               handleEdit(activeTodo)
             }}
             className='border border-black px-2 py-1'>
-            Edit
+            {loading ? 'Loading...' : 'Submit'}
           </button>
           <button onClick={handleCancelEdit} className='border border-black  px-2 py-1'>
             Cancel
@@ -48,9 +49,10 @@ export default function AddTodo({ }: Props) {
         </div>
       ) : (
         <button
+          aria-disabled={loading}
           onClick={() => submitTodo()}
           className='border border-black px-2 py-1'>
-          Submit
+          {loading ? 'Loading...' : 'Submit'}
         </button>
       )}
 

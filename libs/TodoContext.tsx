@@ -16,7 +16,9 @@ type TodoContext = {
   handleDelete: (id: string | undefined) => Promise<void>,
   handleComplete: (todo: Todo) => Promise<void>,
   activeTodo: Todo,
-  setActiveTodo: React.Dispatch<React.SetStateAction<Todo>>
+  setActiveTodo: React.Dispatch<React.SetStateAction<Todo>>,
+  loading: boolean,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const StateContext = createContext<TodoContext | null>(null)
@@ -28,8 +30,10 @@ export default function TodoContext({ children }: Props) {
   const [activeTodo, setActiveTodo] = useState<Todo>({
     todo: "",
   })
+  const [loading, setLoading] = useState<boolean>(false)
 
   const handleEdit = async (todo: Todo) => {
+    setLoading(true)
     await fetch(`/api/todos/${todo._id}`, {
       method: 'PUT',
       body: JSON.stringify({ todo: todoInput.trim() }),
@@ -42,10 +46,12 @@ export default function TodoContext({ children }: Props) {
       setErrors(res.errors)
       mutate([...todos])
     }).catch(err => console.log(err))
+    setLoading(false)
   }
 
   const handleComplete = async (todo: Todo) => {
     const { data: findTodo }: { data: Todo } = await fetch(`/api/todos/${todo._id}`).then(res => res.json())
+    setLoading(true)
     await fetch(`/api/todos/${todo._id}`, {
       method: 'PUT',
       body: JSON.stringify({
@@ -56,10 +62,12 @@ export default function TodoContext({ children }: Props) {
         'Content-Type': 'application/json'
       }
     }).then(_res => mutate([...todos])).catch(err => console.log(err))
+    setLoading(false)
   }
 
   const submitTodo = async () => {
     setErrors([])
+    setLoading(true)
     await fetch("/api/todos", {
       method: "POST",
       body: JSON.stringify({
@@ -77,15 +85,18 @@ export default function TodoContext({ children }: Props) {
     }).catch(err => {
       console.log(err)
     })
+    setLoading(false)
   }
 
   const handleDelete = async (id: string | undefined) => {
+    setLoading(true)
     await fetch(`http://localhost:3000/api/todos/${id}`, {
       method: "DELETE"
     }).then(res => {
       mutate([...todos])
       console.log(res)
     })
+    setLoading(false)
   }
 
   return (
@@ -99,7 +110,9 @@ export default function TodoContext({ children }: Props) {
       handleEdit,
       handleDelete,
       activeTodo,
-      setActiveTodo
+      setActiveTodo,
+      setLoading,
+      loading
     }}>
       {children}
     </StateContext.Provider>

@@ -6,12 +6,12 @@ type Props = {
 }
 
 export default function DeleteButton({ todo }: Props) {
-  const { handleDelete } = useTodoContext()
+  const { handleDelete, loading } = useTodoContext()
   return (
-    <button onClick={() => {
+    <button aria-disabled={loading} onClick={() => {
       handleDelete(todo._id)
     }} className='px-2 py-1 border border-black'>
-      Delete
+      {loading ? 'Loading...' : 'Delete'}
     </button>
   )
 }

@@ -12,8 +12,7 @@ export async function POST(req: NextRequest) {
   let errors = [];
   try {
     await dbConnect();
-    const { todo } = await req.json();
-
+    const { todo, subTasks } = await req.json();
     // check if todo is valid
     if (!todo || todo.trim() === "") {
       errors.push({ message: "Todo is required!" });
@@ -32,11 +31,15 @@ export async function POST(req: NextRequest) {
     const newTodo = {
       todo: todo.trim(),
       isCompleted: false,
+      subTasks,
     };
 
     const res = await Todo.create(newTodo);
 
-    return NextResponse.json({ message: "Success", data: res }, { status: 201 });
+    return NextResponse.json(
+      { message: "Success", data: res },
+      { status: 201 }
+    );
   } catch (err: any) {
     return NextResponse.json(
       { message: "Unexpected error", errors: [err.errors.todo] },
